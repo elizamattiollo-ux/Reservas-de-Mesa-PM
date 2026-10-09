@@ -1,133 +1,109 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Meu Restaurante</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-        }
+    <title>Aplicando Fetch</title>
 
-        header {
-            background-color: #e67e22;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-
-        main {
-            width: 600px;
-            max-width: 90%;
-            margin: 30px auto;
-        }
-
-        section {
-            background-color: white;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-        }
-
-        h2 {
-            color: #e67e22;
-        }
-
-        button {
-            background-color: #e67e22;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        input {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        #frase,
-        #endereco {
-            margin-top: 15px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-    <header>
-        <h1>Meu Restaurante</h1>
-        <p>Bem-vindo!</p>
-    </header>
+    <h1>Consulta de CEP</h1>
 
-    <main>
+    <input
+        type="text"
+        id="cep"
+        placeholder="Digite seu CEP"
+        maxlength="9"
+    >
 
-        <section>
-            <h2>Frase do Chuck Norris</h2>
+    <button onclick="buscarCep()">Buscar CEP</button>
 
-            <button onclick="buscarFrase()">Ver frase</button>
+    <div id="resultado"></div>
 
-            <p id="frase"></p>
-        </section>
+    <hr>
 
+    <h1>Frases do Chuck Norris</h1>
 
-        <section>
-            <h2>Buscar endereço</h2>
+    <button onclick="buscarFrase()">Nova frase</button>
 
-            <input type="text" id="cep" placeholder="Digite seu CEP">
-
-            <button onclick="buscarCep()">Buscar</button>
-
-            <p id="endereco"></p>
-        </section>
-
-    </main>
-
+    <p id="frase">
+        Clique no botão para carregar uma frase!
+    </p>
 
     <script>
-
-        async function buscarFrase() {
-
-            const resposta = await fetch(
-                "https://api.chucknorris.io/jokes/random"
-            );
-
-            const dados = await resposta.json();
-
-            document.getElementById("frase").innerText = dados.value;
-        }
-
-
+        // CONSULTA DE CEP - VIACEP
         async function buscarCep() {
+            const cep = document.getElementById("cep").value
+                .replace(/\D/g, "");
 
-            const cep = document.getElementById("cep").value;
+            const resultado = document.getElementById("resultado");
 
-            const resposta = await fetch(
-                `https://viacep.com.br/ws/${cep}/json/`
-            );
-
-            const dados = await resposta.json();
-
-            if (dados.erro) {
-                document.getElementById("endereco").innerText =
-                    "CEP não encontrado.";
+            if (cep.length !== 8) {
+                resultado.innerText =
+                    "Digite um CEP válido com 8 números.";
                 return;
             }
 
-            document.getElementById("endereco").innerText =
-                dados.logradouro + ", " +
-                dados.bairro + ", " +
-                dados.localidade + " - " +
-                dados.uf;
+            resultado.innerText = "Buscando endereço...";
+
+            try {
+                const resposta = await fetch(
+                    `https://viacep.com.br/ws/${cep}/json/`
+                );
+
+                if (!resposta.ok) {
+                    throw new Error("Erro na consulta do CEP");
+                }
+
+                const dados = await resposta.json();
+
+                if (dados.erro) {
+                    resultado.innerText = "CEP não encontrado.";
+                    return;
+                }
+
+                resultado.innerText =
+                    "Rua: " + (dados.logradouro || "Não informado") +
+                    "\nBairro: " + (dados.bairro || "Não informado") +
+                    "\nCidade: " + dados.localidade +
+                    "\nEstado: " + dados.uf;
+
+            } catch (erro) {
+                resultado.innerText =
+                    "Erro ao consultar o CEP. Tente novamente.";
+                console.error(erro);
+            }
         }
 
+        // FRASES DO CHUCK NORRIS
+        async function buscarFrase() {
+            const frase = document.getElementById("frase");
+
+            frase.innerText = "Carregando frase...";
+
+            try {
+                const resposta = await fetch(
+                    "https://api.chucknorris.io/jokes/random"
+                );
+
+                if (!resposta.ok) {
+                    throw new Error("Erro ao buscar frase");
+                }
+
+                const dados = await resposta.json();
+
+                frase.innerText = dados.value;
+
+            } catch (erro) {
+                frase.innerText =
+                    "Não foi possível carregar a frase. Tente novamente.";
+                console.error(erro);
+            }
+        }
     </script>
 
 </body>
-
 </html>

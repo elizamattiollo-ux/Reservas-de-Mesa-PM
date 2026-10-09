@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Meu Restaurante</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+        }
+
+        header {
+            background-color: #e67e22;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        main {
+            width: 600px;
+            max-width: 90%;
+            margin: 30px auto;
+        }
+
+        section {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        h2 {
+            color: #e67e22;
+        }
+
+        button {
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #frase,
+        #endereco {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Meu Restaurante</h1>
+        <p>Bem-vindo!</p>
+    </header>
+
+    <main>
+
+        <section>
+            <h2>Frase do Chuck Norris</h2>
+
+            <button onclick="buscarFrase()">Ver frase</button>
+
+            <p id="frase"></p>
+        </section>
+
+
+        <section>
+            <h2>Buscar endereço</h2>
+
+            <input type="text" id="cep" placeholder="Digite seu CEP">
+
+            <button onclick="buscarCep()">Buscar</button>
+
+            <p id="endereco"></p>
+        </section>
+
+    </main>
+
+
+    <script>
+
+        async function buscarFrase() {
+
+            const resposta = await fetch(
+                "https://api.chucknorris.io/jokes/random"
+            );
+
+            const dados = await resposta.json();
+
+            document.getElementById("frase").innerText = dados.value;
+        }
+
+
+        async function buscarCep() {
+
+            const cep = document.getElementById("cep").value;
+
+            const resposta = await fetch(
+                `https://viacep.com.br/ws/${cep}/json/`
+            );
+
+            const dados = await resposta.json();
+
+            if (dados.erro) {
+                document.getElementById("endereco").innerText =
+                    "CEP não encontrado.";
+                return;
+            }
+
+            document.getElementById("endereco").innerText =
+                dados.logradouro + ", " +
+                dados.bairro + ", " +
+                dados.localidade + " - " +
+                dados.uf;
+        }
+ 
+    </script>
+
+</body>
+
+</html>
